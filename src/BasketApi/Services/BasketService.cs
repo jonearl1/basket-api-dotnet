@@ -23,7 +23,8 @@ namespace BasketApi.Services
             foreach (var basketEvent in await _basketRepository.GetBasketEvents(id))
             {
                 var addToBasketEvent = (AddToBasketEvent)basketEvent;
-                basketState.AddItem(addToBasketEvent.SKU, addToBasketEvent.Quantity);
+                var price = await _productService.GetPrice(addToBasketEvent.SKU);
+                basketState.AddItem(addToBasketEvent.SKU, addToBasketEvent.Quantity, price);
             }
             return basketState;
         }
@@ -38,7 +39,7 @@ namespace BasketApi.Services
             {
                 throw new BasketRequestException("quantity must not be null");
             }
-            if( !await _productService.ProductExists(sku))
+            if (!await _productService.ProductExists(sku))
             {
                 throw new BasketRequestException("No product matching the sku \"" + sku + "\" exists");
             }

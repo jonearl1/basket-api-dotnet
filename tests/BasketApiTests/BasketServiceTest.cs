@@ -1,6 +1,7 @@
 using BasketApi.Exceptions;
 using BasketApi.Services;
 using BasketApi.Storage;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -27,8 +28,10 @@ namespace BasketApiTests
             var basketState = await basketService.GetBasket(basketId);
 
             Assert.Equal(basketId, basketState.Id);
-            Assert.Equal(sku, basketState.Items?[0].SKU);
-            Assert.Equal(quantity, basketState.Items?[0].Quantity);
+            var item = basketState.Items[0]!;
+            Assert.Equal(sku, item.SKU);
+            Assert.Equal(quantity, item.Quantity);
+            Assert.Equal(12.30m, item.Total);
         }
 
         [Fact]
@@ -46,10 +49,14 @@ namespace BasketApiTests
             var basketState = await basketService.GetBasket(basketId);
 
             Assert.Equal(basketId, basketState.Id);
-            Assert.Equal(sku, basketState.Items?[0].SKU);
-            Assert.Equal(quantity, basketState.Items?[0].Quantity);
-            Assert.Equal(sku2, basketState.Items?[1].SKU);
-            Assert.Equal(quantity, basketState.Items?[1].Quantity);
+            var item = basketState.Items[0]!;
+            Assert.Equal(sku, item.SKU);
+            Assert.Equal(quantity, item.Quantity);
+            Assert.Equal(12.30m, item.Total);
+            var item1 = basketState.Items[1]!;
+            Assert.Equal(sku2, item1.SKU);
+            Assert.Equal(quantity, item1.Quantity);
+            Assert.Equal(100.99m, item1.Total);
         }
 
         [Fact]
@@ -64,9 +71,10 @@ namespace BasketApiTests
 
             var basketState = await basketService.GetBasket(basketId);
 
-            Assert.Equal(basketId, basketState.Id);
-            Assert.Equal(sku, basketState.Items?[0].SKU);
-            Assert.Equal(quantity * 2, basketState.Items?[0].Quantity);
+            var item = basketState.Items[0]!;
+            Assert.Equal(sku, item.SKU);
+            Assert.Equal(quantity * 2, item.Quantity);
+            Assert.Equal(24.60m, item.Total);
         }
 
         [Fact]
@@ -85,6 +93,25 @@ namespace BasketApiTests
             Assert.Equal(basketId2, basketState.Id);
             Assert.Equal(sku, basketState.Items?[0].SKU);
             Assert.Equal(quantity, basketState.Items?[0].Quantity);
+        }
+
+        [Fact]
+        public async Task CalculateTotalOneItem()
+        {
+            await basketService.AddToBasket("1", "sku1", 1);
+            var basketState = await basketService.GetBasket("1");
+
+            Assert.Equal(12.30m, basketState.SubTotal);
+        }
+        [Fact]
+        public async Task CalculateTotalMultipleItems()
+        {
+            await basketService.AddToBasket("1", "sku1", 2);
+            await basketService.AddToBasket("1", "sku2", 3);
+            await basketService.AddToBasket("1", "sku3", 1);
+            var basketState = await basketService.GetBasket("1");
+
+            Assert.Equal(378.56m, basketState.SubTotal);
         }
 
         [Fact]

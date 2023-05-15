@@ -25,5 +25,11 @@ namespace BasketApi.Services
 
             return true;
         }
+
+        public async Task<decimal> GetPrice(string? sku)
+        {
+            var product = await _productsRepository.GetProduct(sku);
+            return product.Price;
+        }
     }
 }

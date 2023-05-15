@@ -10,16 +10,24 @@ public class BasketState
     public decimal? Discount { get; set; }
     public string? DiscountedTotal { get; set; }
 
-    public void AddItem(string? sku, int quantity)
+    public void AddItem(string? sku, int quantity, decimal price)
     {
         var item = Items.Find(i => i?.SKU == sku);
         if (item != null)
         {
             item.Quantity += quantity;
+            item.UpdateTotal();
         }
         else
         {
-            Items?.Add(new BasketItem(sku, quantity));
+            Items?.Add(new BasketItem(sku, quantity, price));
         }
+
+        UpdateTotal();
     }
+
+    private void UpdateTotal()
+    {
+        SubTotal = Items.Sum(item => item.Total);
     }
+}

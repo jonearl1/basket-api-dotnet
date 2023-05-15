@@ -1,13 +1,20 @@
 using BasketApi.Services;
-using Storage;
+using BasketApi.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+    options.Filters.Add(new RequestExceptionFilter()));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<BasketRepository, BasketRepository>();
+builder.Services.AddScoped<ProductsRepository, ProductsRepository>();
+builder.Services.AddScoped<BasketService, BasketService>();
+builder.Services.AddScoped<ProductService, ProductService>();
+
 
 var app = builder.Build();
 
@@ -25,3 +32,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

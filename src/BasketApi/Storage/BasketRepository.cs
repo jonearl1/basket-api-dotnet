@@ -1,4 +1,4 @@
-namespace Storage;
+namespace BasketApi.Storage;
 
 //
 // This is very much a fake implementation to avoid the pain of running a database.
@@ -8,17 +8,21 @@ namespace Storage;
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 public class BasketRepository
 {
-    private readonly ILogger<BasketRepository> _logger;
-    private readonly string _connectionString;
+    private readonly ILogger<BasketRepository>? _logger;
+    private readonly string? _connectionString;
 
 
-    private static Dictionary<string, List<BasketEvent>> _basketEvents = new();
+    private readonly Dictionary<string, List<BasketEvent>> _basketEvents = new();
 
 
-    public BasketRepository(ILogger<BasketRepository> logger, string connectionString)
+    public BasketRepository(ILogger<BasketRepository>? logger, string? connectionString)
     {
         _logger = logger;
         _connectionString = connectionString;
+    }
+
+    public BasketRepository()
+    {
     }
 
     public async Task<IEnumerable<BasketEvent>> GetBasketEvents(string id)
@@ -28,6 +32,10 @@ public class BasketRepository
 
     public async Task AddBasketEvents(string id, BasketEvent ev)
     {
+        if (!_basketEvents.ContainsKey(id))
+        {
+            _basketEvents[id] = new List<BasketEvent>();
+        }
         _basketEvents[id].Add(ev);
     }
 }
@@ -38,11 +46,11 @@ public abstract class BasketEvent
 
 public class AddToBasketEvent : BasketEvent
 {
-    public AddToBasketEvent(string sku, int quantity)
+    public AddToBasketEvent(string? sku, int quantity)
     {
         SKU = sku;
         Quantity = quantity;
     }
-    public string SKU { get; init; }
+    public string? SKU { get; init; }
     public int Quantity { get; init; }
 }

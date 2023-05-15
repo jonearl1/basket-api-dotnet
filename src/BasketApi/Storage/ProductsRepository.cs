@@ -1,4 +1,4 @@
-namespace Storage;
+namespace BasketApi.Storage;
 
 //
 // This is very much a fake implementation to avoid the pain of running a database.
@@ -9,8 +9,8 @@ namespace Storage;
 
 public class ProductsRepository
 {
-    private readonly ILogger<ProductsRepository> _logger;
-    private readonly string _connectionString;
+    private readonly ILogger<ProductsRepository>? _logger;
+    private readonly string? _connectionString;
 
     private static Dictionary<string, Product> _products = new()
     {
@@ -20,10 +20,14 @@ public class ProductsRepository
         {"skubag", new Product("skubag", "Bag", 50.99m) },
     };
 
-    public ProductsRepository(ILogger<ProductsRepository> logger, string connectionString)
+    public ProductsRepository(ILogger<ProductsRepository>? logger, string? connectionString)
     {
         _logger = logger;
         _connectionString = connectionString;
+    }
+
+    public ProductsRepository()
+    {
     }
 
     public async Task<Product> GetProduct(string sku)

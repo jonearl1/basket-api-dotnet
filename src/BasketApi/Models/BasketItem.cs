@@ -2,7 +2,7 @@ namespace BasketApi.Models;
 
 public class BasketItem
 {
-    public BasketItem(string sku, int quantity)
+    public BasketItem(string? sku, int quantity)
     {
         SKU = sku;
         Quantity = quantity;

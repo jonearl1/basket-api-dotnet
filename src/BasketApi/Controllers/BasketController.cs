@@ -1,4 +1,7 @@
+using BasketApi.Exceptions;
+using BasketApi.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace BasketApi.Controllers;
 
@@ -7,10 +10,12 @@ namespace BasketApi.Controllers;
 public class BasketController : ControllerBase
 {
     private readonly ILogger<BasketController> _logger;
+    private BasketService _basketService;
 
-    public BasketController(ILogger<BasketController> logger)
+    public BasketController(ILogger<BasketController> logger, BasketService basketService)
     {
         _logger = logger;
+        _basketService = basketService;
     }
 
     [HttpGet("{id}")]
@@ -22,9 +27,9 @@ public class BasketController : ControllerBase
     [HttpPost("{id}/add")]
     public async Task<BasketState> AddToBasket(string id, AddToBasketRequest request)
     {
-        // service add item with i
-        // service get basket state
-        return new BasketState();
+        await _basketService.AddToBasket(id, request.SKU, request.Quantity);
+
+        return await _basketService.GetBasket(id);
     }
 }
 

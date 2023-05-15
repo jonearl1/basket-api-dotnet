@@ -1,4 +1,4 @@
-namespace Storage;
+namespace BasketApi.Storage;
 
 //
 // This is very much a fake implementation to avoid the pain of running a database.

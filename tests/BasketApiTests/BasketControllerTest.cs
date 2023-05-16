@@ -69,7 +69,7 @@ namespace BasketApiTests
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             const string expected =
-                "{\"id\":\"1\",\"items\":[{\"sku\":\"sku1\",\"quantity\":1,\"price\":12.30,\"total\":12.30,\"discount\":null,\"discountDescription\":null}],\"subTotal\":12.30,\"discount\":null,\"discountedTotal\":null}";
+                "{\"id\":\"1\",\"items\":[{\"sku\":\"sku1\",\"quantity\":1,\"price\":12.30,\"total\":12.30,\"discount\":1.4760,\"discountDescription\":\"12% of Alpha's\"}],\"subTotal\":12.30,\"discount\":1.4760,\"discountedTotal\":10.8240}";
         Assert.Equal(expected, result);
         }
     }

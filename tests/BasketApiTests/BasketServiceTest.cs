@@ -102,6 +102,7 @@ namespace BasketApiTests
             var basketState = await basketService.GetBasket("1");
 
             Assert.Equal(12.30m, basketState.SubTotal);
+            Assert.Equal(12.30m, basketState.Items?[0].Total);
         }
 
         [Fact]
@@ -113,9 +114,50 @@ namespace BasketApiTests
             var basketState = await basketService.GetBasket("1");
 
             Assert.Equal(378.56m, basketState.SubTotal);
+            Assert.Equal(24.60m, basketState.Items?[0].Total);
+            Assert.Equal(302.97m, basketState.Items?[1].Total);
+            Assert.Equal(50.99m, basketState.Items?[2].Total);
         }
 
-       
+
+        [Fact]
+        public async Task CalculatePercentageDiscountNoDiscount()
+        {
+            await basketService.AddToBasket("1", "sku2", 1);
+            var basketState = await basketService.GetBasket("1");
+
+            Assert.Equal(0m, basketState.Discount);
+            Assert.Equal(100.99m, basketState.DiscountedTotal);
+            Assert.Equal(0m, basketState.Items?[0].Discount);
+            Assert.Null(basketState.Items?[0].DiscountDescription);
+            Assert.Equal(0m, basketState.Items?[0].Discount);
+        }
+
+        [Fact]
+        public async Task CalculatePercentageDiscountOneItem()
+        {
+            await basketService.AddToBasket("1", "sku1", 1);
+            var basketState = await basketService.GetBasket("1");
+
+            Assert.Equal(1.476m, basketState.Discount);
+            Assert.Equal(10.8240m, basketState.DiscountedTotal);
+            Assert.Equal(1.476m, basketState.Items?[0].Discount);
+            Assert.Equal("12% of Alpha's", basketState.Items?[0].DiscountDescription);
+            Assert.Equal(1.476m, basketState.Items?[0].Discount);
+        }
+
+        [Fact]
+        public async Task CalculateDiscountManyItem()
+        {
+            await basketService.AddToBasket("1", "sku1", 2);
+            await basketService.AddToBasket("1", "sku3", 3);
+            var basketState = await basketService.GetBasket("1");
+
+            Assert.Equal(2.9520m, basketState.Discount);
+            Assert.Equal(174.6180m, basketState.DiscountedTotal);
+            Assert.Equal(2.9520m, basketState.Items?[0].Discount);
+            Assert.Equal(0m, basketState.Items?[1].Discount);
+        }
 
         [Fact]
         public async Task NullSku()

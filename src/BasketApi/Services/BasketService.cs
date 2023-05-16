@@ -23,35 +23,31 @@ namespace BasketApi.Services
             {
                 Id = id
             };
-            await AddProductsToBasket(id, basket);
+            await CollectBasketProducts(id, basket);
+            await CollectBasketDiscounts(basket);
 
             var basketState = basket.ToBasketState();
-            // await AddDiscountsToBasket(id, basketState);
             return basketState;
         }
 
-        // private async Task AddDiscountsToBasket(string id, BasketState basketState)
-        // {
-        //     HashSet<DiscountRule> ruleSet = new();
-        //     foreach (var item in basketState.Products)
-        //     {
-        //         var rule = await _discountService.GetPercentageDiscount(item.SKU);
-        //         if (rule != null)
-        //         {
-        //             ruleSet.Add(rule);
-        //         }
-        //     }
-        //
-        //     basketState.ApplyDiscounts(ruleSet);
-        // }
-
-        private async Task AddProductsToBasket(string id, Basket basket)
+        private async Task CollectBasketProducts(string id, Basket basket)
         {
             foreach (var basketEvent in await _basketRepository.GetBasketEvents(id))
             {
                 var addToBasketEvent = (AddToBasketEvent)basketEvent;
                 var price = await _productService.GetPrice(addToBasketEvent.SKU);
-                basket.AddItem(addToBasketEvent.SKU, addToBasketEvent.Quantity, price);
+                basket.AddProduct(addToBasketEvent.SKU, addToBasketEvent.Quantity, price);
+            }
+        }
+        private async Task CollectBasketDiscounts(Basket basket)
+        {
+            foreach (var item in basket.Products)
+            {
+                var rule = await _discountService.GetDiscount(item.SKU);
+                if (rule != null)
+                {
+                    basket.AddDiscount(rule);
+                }
             }
         }
 

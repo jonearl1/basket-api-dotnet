@@ -25,6 +25,7 @@ public class Product
             Price = Price
         };
         item.Total = item.Quantity * item.Price;
+        item.Discount = 0m;
         return item;
     }
 }

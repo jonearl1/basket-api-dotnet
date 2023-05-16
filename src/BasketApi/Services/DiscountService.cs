@@ -12,19 +12,10 @@ namespace BasketApi.Services
             _discountsRepository = discountsRepository;
         }
 
-        public async Task<DiscountRule?> GetPercentageDiscount(string? sku)
+        public async Task<DiscountRule?> GetDiscount(string? sku)
         {
-            DiscountRule? discountRule = null;
             var discountRules = await _discountsRepository.GetDiscountRules();
-            foreach (var rule in discountRules)
-            {
-                if (rule.Type == DiscountType.Percentage && rule.ProductSKU == sku )
-                {
-                    discountRule = rule;
-                }
-            }
-
-            return discountRule;
+            return discountRules.FirstOrDefault(rule => rule?.ProductSKU == sku);
         }
     }
 }

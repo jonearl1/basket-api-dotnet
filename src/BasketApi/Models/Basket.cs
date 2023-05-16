@@ -1,4 +1,6 @@
 using BasketApi.Models;
+using BasketApi.Storage;
+using Product = BasketApi.Models.Product;
 
 namespace BasketApi.Controllers;
 
@@ -6,11 +8,11 @@ public class Basket
 {
     public string? Id { get; set; }
     public List<Product?> Products { get; set; } = new();
-    public decimal? SubTotal { get; set; }
-    public decimal? Discount { get; set; }
-    public string? DiscountedTotal { get; set; }
 
-    public void AddItem(string? sku, int quantity, decimal price)
+    private HashSet<DiscountRule> _discountRules = new();
+
+
+    public void AddProduct(string? sku, int quantity, decimal price)
     {
         var product = Products.Find(i => i?.SKU == sku);
         if (product != null)
@@ -21,7 +23,12 @@ public class Basket
         {
             Products?.Add(new Product(sku, quantity, price));
         }
-        
+
+    }
+
+    public void AddDiscount(DiscountRule discountRule)
+    {
+        _discountRules.Add(discountRule);
     }
 
     public BasketState ToBasketState()
@@ -40,7 +47,30 @@ public class Basket
         }
 
         if (basketState.Items != null)
+        {
             basketState.SubTotal = basketState.Items.Sum(item => item.Total);
+
+            foreach (var discount in _discountRules)
+            {
+                var item = basketState.Items.FirstOrDefault(item => item.SKU == discount.ProductSKU);
+                if (item != null)
+                {
+                    if (discount.Type == DiscountType.Percentage)
+                    {
+                        item.DiscountDescription = discount.Description;
+                        item.Discount = item.Total * (decimal?)discount.Percentage * 0.01m;
+                    }
+
+                    if (discount.Type == DiscountType.Bogof)
+                    {
+                    }
+                }
+            }
+
+            basketState.Discount = basketState.Items.Sum(item => item.Discount);
+        }
+
+        basketState.DiscountedTotal = basketState.SubTotal - basketState.Discount;
 
         return basketState;
     }

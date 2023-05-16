@@ -12,7 +12,7 @@ public class DiscountsRepository
     private readonly ILogger<DiscountsRepository> _logger;
     private readonly string _connectionString;
 
-    private static List<DiscountRule> _discountRules = new()
+    private static List<DiscountRule?> _discountRules = new()
     {
         DiscountRule.PercentageRule("sku1", "12% of Alpha's", 12),
         DiscountRule.BOGOFRule("sku2", "Buy 3 Betas get 1 free", 3),
@@ -24,7 +24,11 @@ public class DiscountsRepository
         _connectionString = connectionString;
     }
 
-    public async Task<IEnumerable<DiscountRule>> GetDiscountRules()
+    public DiscountsRepository()
+    {
+    }
+
+    public async Task<IEnumerable<DiscountRule?>> GetDiscountRules()
     {
         return _discountRules;
     }

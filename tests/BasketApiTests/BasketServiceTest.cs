@@ -14,7 +14,7 @@ namespace BasketApiTests
 
         public BasketServiceTest()
         {
-            basketService = new BasketService(new BasketRepository(), new ProductService(new ProductsRepository()));
+            basketService = new BasketService(new BasketRepository(), new ProductService(new ProductsRepository()), new DiscountService(new DiscountsRepository()));
         }
 
         [Fact]
@@ -103,6 +103,7 @@ namespace BasketApiTests
 
             Assert.Equal(12.30m, basketState.SubTotal);
         }
+
         [Fact]
         public async Task CalculateTotalMultipleItems()
         {
@@ -113,6 +114,8 @@ namespace BasketApiTests
 
             Assert.Equal(378.56m, basketState.SubTotal);
         }
+
+       
 
         [Fact]
         public async Task NullSku()

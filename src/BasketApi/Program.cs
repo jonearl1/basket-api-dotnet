@@ -14,6 +14,8 @@ builder.Services.AddScoped<BasketRepository, BasketRepository>();
 builder.Services.AddScoped<ProductsRepository, ProductsRepository>();
 builder.Services.AddScoped<BasketService, BasketService>();
 builder.Services.AddScoped<ProductService, ProductService>();
+builder.Services.AddScoped<DiscountService, DiscountService>();
+builder.Services.AddScoped<DiscountsRepository, DiscountsRepository>();
 
 
 var app = builder.Build();

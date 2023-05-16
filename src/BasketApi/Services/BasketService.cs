@@ -1,6 +1,7 @@
 ﻿using BasketApi.Controllers;
 using BasketApi.Exceptions;
 using BasketApi.Storage;
+using System.Collections.Generic;
 
 namespace BasketApi.Services
 {
@@ -8,25 +9,50 @@ namespace BasketApi.Services
     {
         private readonly BasketRepository _basketRepository;
         private readonly ProductService _productService;
-        public BasketService(BasketRepository basketRepository, ProductService productService)
+        private readonly DiscountService _discountService;
+        public BasketService(BasketRepository basketRepository, ProductService productService, DiscountService discountService)
         {
             _basketRepository = basketRepository;
             _productService = productService;
+            _discountService = discountService;
         }
 
         public async Task<BasketState> GetBasket(string id)
         {
-            BasketState basketState = new()
+            Basket basket = new()
             {
                 Id = id
             };
+            await AddProductsToBasket(id, basket);
+
+            var basketState = basket.ToBasketState();
+            // await AddDiscountsToBasket(id, basketState);
+            return basketState;
+        }
+
+        // private async Task AddDiscountsToBasket(string id, BasketState basketState)
+        // {
+        //     HashSet<DiscountRule> ruleSet = new();
+        //     foreach (var item in basketState.Products)
+        //     {
+        //         var rule = await _discountService.GetPercentageDiscount(item.SKU);
+        //         if (rule != null)
+        //         {
+        //             ruleSet.Add(rule);
+        //         }
+        //     }
+        //
+        //     basketState.ApplyDiscounts(ruleSet);
+        // }
+
+        private async Task AddProductsToBasket(string id, Basket basket)
+        {
             foreach (var basketEvent in await _basketRepository.GetBasketEvents(id))
             {
                 var addToBasketEvent = (AddToBasketEvent)basketEvent;
                 var price = await _productService.GetPrice(addToBasketEvent.SKU);
-                basketState.AddItem(addToBasketEvent.SKU, addToBasketEvent.Quantity, price);
+                basket.AddItem(addToBasketEvent.SKU, addToBasketEvent.Quantity, price);
             }
-            return basketState;
         }
 
         public async Task AddToBasket(string id, string? sku, int? quantity)

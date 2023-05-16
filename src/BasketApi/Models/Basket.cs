@@ -1,8 +1,7 @@
-using BasketApi.Models;
+using BasketApi.Controllers;
 using BasketApi.Storage;
-using Product = BasketApi.Models.Product;
 
-namespace BasketApi.Controllers;
+namespace BasketApi.Models;
 
 public class Basket
 {
@@ -61,8 +60,10 @@ public class Basket
                         item.Discount = item.Total * (decimal?)discount.Percentage * 0.01m;
                     }
 
-                    if (discount.Type == DiscountType.Bogof)
+                    if (discount.Type == DiscountType.Bogof && item.Quantity >= discount.MinimumRequired)
                     {
+                        item.DiscountDescription = discount.Description;
+                        item.Discount = (item.Quantity / discount.MinimumRequired) * item.Price;
                     }
                 }
             }

@@ -1,6 +1,4 @@
-﻿using BasketApi.Controllers;
-using BasketApi.Models;
-using BasketApi.Storage;
+﻿using BasketApi.Storage;
 
 namespace BasketApi.Services
 {

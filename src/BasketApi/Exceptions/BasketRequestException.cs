@@ -1,10 +1,9 @@
-﻿namespace BasketApi.Exceptions
+﻿namespace BasketApi.Exceptions;
+
+public class BasketRequestException: Exception
 {
-    public class BasketRequestException: Exception
+    public BasketRequestException(string message)
+        :base(message)
     {
-        public BasketRequestException(string message)
-            :base(message)
-        {
-        }
     }
 }

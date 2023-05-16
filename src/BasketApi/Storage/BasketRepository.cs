@@ -12,7 +12,7 @@ public class BasketRepository
     private readonly string? _connectionString;
 
 
-    private readonly Dictionary<string, List<BasketEvent>> _basketEvents = new();
+    private static Dictionary<string, List<BasketEvent>> _basketEvents = new();
 
 
     public BasketRepository(ILogger<BasketRepository>? logger, string? connectionString)
@@ -37,6 +37,11 @@ public class BasketRepository
             _basketEvents[id] = new List<BasketEvent>();
         }
         _basketEvents[id].Add(ev);
+    }
+
+    public void ResetBasketEvents()
+    {
+        _basketEvents = new Dictionary<string, List<BasketEvent>>();
     }
 }
 

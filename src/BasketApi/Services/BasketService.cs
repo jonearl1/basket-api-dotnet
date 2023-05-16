@@ -1,5 +1,5 @@
-﻿using BasketApi.Controllers;
-using BasketApi.Exceptions;
+﻿using BasketApi.Exceptions;
+using BasketApi.Models;
 using BasketApi.Storage;
 using System.Collections.Generic;
 
@@ -32,14 +32,25 @@ namespace BasketApi.Services
 
         private async Task CollectBasketProducts(string id, Basket basket)
         {
-            foreach (var basketEvent in await _basketRepository.GetBasketEvents(id))
+            IEnumerable<BasketEvent> basketEvents;
+            try
+            {
+                basketEvents = await _basketRepository.GetBasketEvents(id);
+            }
+            catch (System.Collections.Generic.KeyNotFoundException)
+            {
+                throw new BasketRequestException("No basket found with id " + id);
+            }
+
+            foreach (var basketEvent in basketEvents)
             {
                 var addToBasketEvent = (AddToBasketEvent)basketEvent;
                 var price = await _productService.GetPrice(addToBasketEvent.SKU);
                 basket.AddProduct(addToBasketEvent.SKU, addToBasketEvent.Quantity, price);
+
             }
         }
-        private async Task CollectBasketDiscounts(Basket basket)
+            private async Task CollectBasketDiscounts(Basket basket)
         {
             foreach (var item in basket.Products)
             {
@@ -53,14 +64,6 @@ namespace BasketApi.Services
 
         public async Task AddToBasket(string id, string? sku, int? quantity)
         {
-            if (sku == null)
-            {
-                throw new BasketRequestException("sku must not be null");
-            }
-            if (quantity == null)
-            {
-                throw new BasketRequestException("quantity must not be null");
-            }
             if (!await _productService.ProductExists(sku))
             {
                 throw new BasketRequestException("No product matching the sku \"" + sku + "\" exists");

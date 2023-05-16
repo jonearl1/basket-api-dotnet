@@ -1,7 +1,7 @@
-using BasketApi.Exceptions;
 using BasketApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
+using System.ComponentModel.DataAnnotations;
+using BasketApi.Models;
 
 namespace BasketApi.Controllers;
 
@@ -19,9 +19,9 @@ public class BasketController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<BasketState> Get()
+    public async Task<BasketState> Get(string id)
     {
-        return new BasketState();
+        return await _basketService.GetBasket(id);
     }
 
     [HttpPost("{id}/add")]
@@ -35,6 +35,10 @@ public class BasketController : ControllerBase
 
 public class AddToBasketRequest
 {
+    [Required]
     public string? SKU { get; set; }
+    [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "Quantity must be a number greater than 0")]
     public int? Quantity { get; set; }
 }
+

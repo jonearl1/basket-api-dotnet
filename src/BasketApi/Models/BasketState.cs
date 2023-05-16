@@ -1,6 +1,4 @@
-using BasketApi.Models;
-
-namespace BasketApi.Controllers;
+namespace BasketApi.Models;
 
 public class BasketState
 {

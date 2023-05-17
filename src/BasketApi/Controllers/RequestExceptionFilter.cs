@@ -1,6 +1,6 @@
 ﻿using BasketApi.Exceptions;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 public class RequestExceptionFilter : IActionFilter, IOrderedFilter
 {

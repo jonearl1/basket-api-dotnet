@@ -13,7 +13,7 @@ namespace BasketApi.Services
         public async Task<DiscountRule?> GetDiscount(string? sku)
         {
             var discountRules = await _discountsRepository.GetDiscountRules();
-            return discountRules.FirstOrDefault(rule => rule?.ProductSKU == sku );
+            return discountRules.FirstOrDefault(rule => rule?.ProductSKU == sku);
         }
     }
 }

@@ -1,4 +1,3 @@
-using BasketApi.Controllers;
 using BasketApi.Storage;
 
 namespace BasketApi.Models;
@@ -17,12 +16,15 @@ public class Basket
         if (product != null)
         {
             product.Quantity += quantity;
+            if (product.Quantity == 0)
+            {
+                Products.Remove(product);
+            }
         }
         else
         {
             Products?.Add(new Product(sku, quantity, price));
         }
-
     }
 
     public void AddDiscount(DiscountRule discountRule)
@@ -34,43 +36,38 @@ public class Basket
     {
         BasketState basketState = new()
         {
-            Id = Id
+            Id = Id,
+            Items = new List<BasketItem>()
         };
         foreach (var item in Products.Select(product => product?.ToItem()))
         {
             if (item != null)
             {
-                basketState.Items ??= new List<BasketItem>();
                 basketState.Items?.Add(item);
             }
         }
 
-        if (basketState.Items != null)
+        basketState.SubTotal = basketState.Items.Sum(item => item.Total);
+
+        foreach (var discount in _discountRules)
         {
-            basketState.SubTotal = basketState.Items.Sum(item => item.Total);
-
-            foreach (var discount in _discountRules)
+            var item = basketState.Items.FirstOrDefault(item => item.SKU == discount.ProductSKU);
+            if (item != null)
             {
-                var item = basketState.Items.FirstOrDefault(item => item.SKU == discount.ProductSKU);
-                if (item != null)
+                if (discount.Type == DiscountType.Percentage)
                 {
-                    if (discount.Type == DiscountType.Percentage)
-                    {
-                        item.DiscountDescription = discount.Description;
-                        item.Discount = item.Total * (decimal?)discount.Percentage * 0.01m;
-                    }
+                    item.DiscountDescription = discount.Description;
+                    item.Discount = item.Total * (decimal?)discount.Percentage * 0.01m;
+                }
 
-                    if (discount.Type == DiscountType.Bogof && item.Quantity >= discount.MinimumRequired)
-                    {
-                        item.DiscountDescription = discount.Description;
-                        item.Discount = (item.Quantity / discount.MinimumRequired) * item.Price;
-                    }
+                if (discount.Type == DiscountType.Bogof && item.Quantity >= discount.MinimumRequired)
+                {
+                    item.DiscountDescription = discount.Description;
+                    item.Discount = (item.Quantity / discount.MinimumRequired) * item.Price;
                 }
             }
-
-            basketState.Discount = basketState.Items.Sum(item => item.Discount);
         }
-
+        basketState.Discount = basketState.Items.Sum(item => item.Discount);
         basketState.DiscountedTotal = basketState.SubTotal - basketState.Discount;
 
         return basketState;

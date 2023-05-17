@@ -16,7 +16,7 @@ namespace BasketApi.Services
             {
                 var product = await _productsRepository.GetProduct(sku);
             }
-            catch(System.Collections.Generic.KeyNotFoundException)
+            catch (System.Collections.Generic.KeyNotFoundException)
             {
                 return false;
             }

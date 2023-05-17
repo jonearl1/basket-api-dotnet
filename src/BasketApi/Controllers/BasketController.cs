@@ -1,7 +1,7 @@
+using BasketApi.Models;
 using BasketApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using BasketApi.Models;
 
 namespace BasketApi.Controllers;
 
@@ -35,7 +35,8 @@ public class BasketController : ControllerBase
 
     [HttpPost("remove")]
     public async Task<BasketState> RemoveFromBasket(string id, RemoveFromBasketRequest request)
-    { await _basketService.RemoveFromBasket(id, request.SKU);
+    {
+        await _basketService.RemoveFromBasket(id, request.SKU, request.Quantity.Value);
 
         return await _basketService.GetBasket(id);
     }
@@ -53,4 +54,7 @@ public class RemoveFromBasketRequest
 {
     [Required]
     public string? SKU { get; set; }
+    [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "Quantity must be a number greater than 0")]
+    public int? Quantity { get; set; }
 }

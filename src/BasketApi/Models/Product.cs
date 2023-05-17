@@ -1,6 +1,3 @@
-using BasketApi.Controllers;
-using BasketApi.Storage;
-
 namespace BasketApi.Models;
 
 public class Product

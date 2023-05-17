@@ -19,19 +19,19 @@ namespace BasketApi.Services
 
         public async Task<BasketState> GetBasket(string id)
         {
-            Basket basket = new()
-            {
-                Id = id
-            };
-            await CollectBasketProducts(id, basket);
-            await CollectBasketDiscounts(basket);
+            var basket = await CollectBasketProducts(id);
+            await AddDiscountsToBasket(basket);
 
             var basketState = basket.ToBasketState();
             return basketState;
         }
 
-        private async Task CollectBasketProducts(string id, Basket basket)
+        private async Task<Basket> CollectBasketProducts(string id)
         {
+            Basket basket = new()
+            {
+                Id = id
+            };
             IEnumerable<BasketEvent> basketEvents;
             try
             {
@@ -49,8 +49,11 @@ namespace BasketApi.Services
                 basket.AddProduct(addToBasketEvent.SKU, addToBasketEvent.Quantity, price);
 
             }
+
+            return basket;
         }
-            private async Task CollectBasketDiscounts(Basket basket)
+
+        private async Task AddDiscountsToBasket(Basket basket)
         {
             foreach (var item in basket.Products)
             {
@@ -62,13 +65,27 @@ namespace BasketApi.Services
             }
         }
 
-        public async Task AddToBasket(string id, string? sku, int? quantity)
+        public async Task AddToBasket(string id, string sku, int quantity)
         {
             if (!await _productService.ProductExists(sku))
             {
                 throw new BasketRequestException("No product matching the sku \"" + sku + "\" exists");
             }
-            await _basketRepository.AddBasketEvents(id, new AddToBasketEvent(sku, (int)quantity));
+            await _basketRepository.AddBasketEvents(id, new AddToBasketEvent(sku, quantity));
+        }
+
+        public async Task RemoveFromBasket(string id, string sku)
+        {
+            if (!await _productService.ProductExists(sku))
+            {
+                throw new BasketRequestException("No product matching the sku \"" + sku + "\" exists");
+            }
+            var basket = await CollectBasketProducts(id);
+            if (basket.Products.Find(p => p.SKU == sku).Quantity == 0)
+            {
+                throw new BasketRequestException("No quantity of product \"" + sku + "\" exists in the basket");
+            }
+            await _basketRepository.AddBasketEvents(id, new AddToBasketEvent(sku, -1));
         }
     }
 }

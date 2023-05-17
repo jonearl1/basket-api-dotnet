@@ -51,11 +51,11 @@ public abstract class BasketEvent
 
 public class AddToBasketEvent : BasketEvent
 {
-    public AddToBasketEvent(string? sku, int quantity)
+    public AddToBasketEvent(string sku, int quantity)
     {
         SKU = sku;
         Quantity = quantity;
     }
-    public string? SKU { get; init; }
+    public string SKU { get; init; }
     public int Quantity { get; init; }
 }

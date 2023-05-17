@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -17,7 +18,18 @@ namespace BasketApiTests
         }
 
         [Fact]
-        public async Task InvalidSku()
+        public async Task GetRequestOnEmptyBaskets()
+        {
+            var response = await _httpClient.GetAsync("Basket/empty");
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            const string expected = "No basket found with id empty";
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public async Task AddInvalidSku()
         {
             var content = new StringContent("{\"sku\": \"string\",\"quantity\": 1}");
             content.Headers.Remove("Content-Type");
@@ -30,7 +42,7 @@ namespace BasketApiTests
         }
 
         [Fact]
-        public async Task EmptySku()
+        public async Task AddEmptySku()
         {
             var content = new StringContent("{\"quantity\": 1}");
             content.Headers.Remove("Content-Type");
@@ -42,7 +54,7 @@ namespace BasketApiTests
         }
 
         [Fact]
-        public async Task EmptyQuantity()
+        public async Task AddEmptyQuantity()
         {
             var content = new StringContent("{\"sku\": \"sku1\"}");
             content.Headers.Remove("Content-Type");
@@ -51,17 +63,6 @@ namespace BasketApiTests
             var response = await _httpClient.PostAsync("Basket/one/add", content);
             var result = await response.Content.ReadAsStringAsync();
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task GetRequestOnEmptyBaskets()
-        {
-            var response = await _httpClient.GetAsync("Basket/empty");
-            var result = await response.Content.ReadAsStringAsync();
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            const string expected = "No basket found with id empty";
-            Assert.Equal(expected, result);
         }
 
         [Fact]
@@ -127,5 +128,68 @@ namespace BasketApiTests
 
             return await response.Content.ReadAsStringAsync();
         }
+
+        [Fact]
+        public async Task RemoveItemEmptyBasket()
+        {
+            var content = new StringContent("{\"sku\": \"sku1\"}");
+            content.Headers.Remove("Content-Type");
+            content.Headers.Add("Content-Type", "application/json");
+
+            var response = await _httpClient.PostAsync("Basket/re/remove", content);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var result = await response.Content.ReadAsStringAsync();
+
+            const string expected = "No basket found with id re";
+            Assert.Equal(expected, result);
+        }
+
+
+        [Fact]
+        public async Task RemoveInvalidSku()
+        {
+            var content = new StringContent("{\"sku\": \"string\"}");
+            content.Headers.Remove("Content-Type");
+            content.Headers.Add("Content-Type", "application/json");
+
+            var response = await _httpClient.PostAsync("Basket/r1/remove", content);
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal("No product matching the sku \"string\" exists", result);
+        }
+
+        [Fact]
+        public async Task RemoveEmptySku()
+        {
+            var content = new StringContent("{}");
+            content.Headers.Remove("Content-Type");
+            content.Headers.Add("Content-Type", "application/json");
+
+            var response = await _httpClient.PostAsync("Basket/r2/remove", content);
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+
+
+        // [Fact]
+        // public async Task RemoveOneItem()
+        // {
+        //     await AddRequestReturnsOk("Basket/r3/add", "{\"sku\": \"sku1\",\"quantity\": 2}");
+        //
+        //     var content = new StringContent("{}");
+        //     content.Headers.Remove("Content-Type");
+        //     content.Headers.Add("Content-Type", "application/json");
+        //
+        //     var response = await _httpClient.PostAsync("Basket/r3/remove", content);
+        //     var result = await response.Content.ReadAsStringAsync();
+        //     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        //
+        //     // const string expected =
+        //     //     "{\"id\":\"3\",\"items\":[{\"sku\":\"sku1\",\"quantity\":1,\"price\":12.30,\"total\":12.30,\"discount\":1.4760,\"discountDescription\":\"12% of Alpha's\"}],\"subTotal\":12.30,\"discount\":1.4760,\"discountedTotal\":10.8240}";
+        //     //
+        //     // Assert.Equal(expected, result);
+        // }
     }
 }

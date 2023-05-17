@@ -6,7 +6,6 @@ using Xunit;
 
 namespace BasketApiTests
 {
-    [Collection("Sequential")]
     public class BasketServiceTest
     {
         private readonly BasketService _basketService;
@@ -202,10 +201,49 @@ namespace BasketApiTests
         }
 
         [Fact]
-        public async Task InvalidSku()
+        public async Task AddInvalidSku()
         {
             await Assert.ThrowsAsync<BasketRequestException>(() =>
                 _basketService.AddToBasket("basketId", "not_on_the_list", 1));
+        }
+
+        [Fact]
+        public async Task RemoveInvalidSku()
+        {
+            await Assert.ThrowsAsync<BasketRequestException>(() =>
+                _basketService.RemoveFromBasket("basketId", "not_on_the_list"));
+        }
+
+        [Fact]
+        public async Task RemoveOneItem()
+        {
+            const string basketId = "1";
+            const string? sku = "sku3";
+
+            await _basketService.AddToBasket(basketId, sku, 2);
+            await _basketService.RemoveFromBasket(basketId, sku);
+
+
+            var basketState = await _basketService.GetBasket(basketId);
+
+            Assert.Equal(basketId, basketState.Id);
+            Assert.Equal(50.99m, basketState.SubTotal);
+            Assert.Equal(50.99m, basketState.Items?[0].Total);
+
+            var item = basketState.Items?[0]!;
+            Assert.Equal(sku, item.SKU);
+            Assert.Equal(1, item.Quantity);
+            Assert.Equal(50.99m, item.Total);
+        }
+
+        [Fact]
+        public async Task RemoveOneNoItemsInBasket()
+        {
+            const string basketId = "1";
+            const string? sku = "sku3";
+
+            await Assert.ThrowsAsync<BasketRequestException>(() =>
+                _basketService.RemoveFromBasket(basketId, sku));
         }
     }
 }

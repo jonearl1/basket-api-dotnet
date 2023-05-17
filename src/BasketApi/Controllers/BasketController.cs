@@ -6,7 +6,7 @@ using BasketApi.Models;
 namespace BasketApi.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("[controller]/{id}")]
 public class BasketController : ControllerBase
 {
     private readonly ILogger<BasketController> _logger;
@@ -18,16 +18,24 @@ public class BasketController : ControllerBase
         _basketService = basketService;
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("")]
     public async Task<BasketState> Get(string id)
     {
         return await _basketService.GetBasket(id);
     }
 
-    [HttpPost("{id}/add")]
+    [HttpPost("add")]
     public async Task<BasketState> AddToBasket(string id, AddToBasketRequest request)
     {
-        await _basketService.AddToBasket(id, request.SKU, request.Quantity);
+        await _basketService.AddToBasket(id, request.SKU, request.Quantity.Value);
+
+        return await _basketService.GetBasket(id);
+    }
+
+
+    [HttpPost("remove")]
+    public async Task<BasketState> RemoveFromBasket(string id, RemoveFromBasketRequest request)
+    { await _basketService.RemoveFromBasket(id, request.SKU);
 
         return await _basketService.GetBasket(id);
     }
@@ -41,4 +49,8 @@ public class AddToBasketRequest
     [Range(1, int.MaxValue, ErrorMessage = "Quantity must be a number greater than 0")]
     public int? Quantity { get; set; }
 }
-
+public class RemoveFromBasketRequest
+{
+    [Required]
+    public string? SKU { get; set; }
+}

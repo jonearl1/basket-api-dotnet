@@ -173,23 +173,23 @@ namespace BasketApiTests
 
 
 
-        // [Fact]
-        // public async Task RemoveOneItem()
-        // {
-        //     await AddRequestReturnsOk("Basket/r3/add", "{\"sku\": \"sku1\",\"quantity\": 2}");
-        //
-        //     var content = new StringContent("{}");
-        //     content.Headers.Remove("Content-Type");
-        //     content.Headers.Add("Content-Type", "application/json");
-        //
-        //     var response = await _httpClient.PostAsync("Basket/r3/remove", content);
-        //     var result = await response.Content.ReadAsStringAsync();
-        //     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        //
-        //     // const string expected =
-        //     //     "{\"id\":\"3\",\"items\":[{\"sku\":\"sku1\",\"quantity\":1,\"price\":12.30,\"total\":12.30,\"discount\":1.4760,\"discountDescription\":\"12% of Alpha's\"}],\"subTotal\":12.30,\"discount\":1.4760,\"discountedTotal\":10.8240}";
-        //     //
-        //     // Assert.Equal(expected, result);
-        // }
+        [Fact]
+        public async Task RemoveOneItem()
+        {
+            await AddRequestReturnsOk("Basket/r3/add", "{\"sku\": \"sku1\",\"quantity\": 2}");
+
+            var content = new StringContent("{\"sku\": \"sku1\"}");
+            content.Headers.Remove("Content-Type");
+            content.Headers.Add("Content-Type", "application/json");
+        
+            var response = await _httpClient.PostAsync("Basket/r3/remove", content);
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        
+            const string expected =
+                "{\"id\":\"r3\",\"items\":[{\"sku\":\"sku1\",\"quantity\":1,\"price\":12.30,\"total\":12.30,\"discount\":1.4760,\"discountDescription\":\"12% of Alpha's\"}],\"subTotal\":12.30,\"discount\":1.4760,\"discountedTotal\":10.8240}";
+            
+            Assert.Equal(expected, result);
+        }
     }
 }
